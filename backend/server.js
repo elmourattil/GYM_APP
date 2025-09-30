@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config({ path: './config.env' });
 
 // Import routes
@@ -23,8 +24,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // CORS middleware
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://yourdomain.com'] 
+  origin: process.env.NODE_ENV === 'production'
+    ? [process.env.CORS_ORIGIN].filter(Boolean)
     : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173'],
   credentials: true
 }));
@@ -54,13 +55,16 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Serve static files in production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../frontend/dist')));
-  
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
-  });
+// Serve static files only if explicitly enabled AND client build exists
+if (process.env.SERVE_CLIENT === 'true') {
+  const clientDir = path.join(__dirname, '../frontend/dist');
+  const indexFile = path.join(clientDir, 'index.html');
+  if (fs.existsSync(clientDir) && fs.existsSync(indexFile)) {
+    app.use(express.static(clientDir));
+    app.get('*', (req, res) => {
+      res.sendFile(indexFile);
+    });
+  }
 }
 
 // Error handling middleware

@@ -19,3 +19,5 @@ services:
         value: 7d
       - key: CORS_ORIGIN
         value: https://<your-frontend>.vercel.app
+      - key: SERVE_CLIENT
+        value: "false"
