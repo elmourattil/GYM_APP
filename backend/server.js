@@ -55,6 +55,15 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Friendly root message
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Gym API running',
+    docs: '/api/health'
+  });
+});
+
 // Serve static files only if explicitly enabled AND client build exists
 if (process.env.SERVE_CLIENT === 'true') {
   const clientDir = path.join(__dirname, '../frontend/dist');
